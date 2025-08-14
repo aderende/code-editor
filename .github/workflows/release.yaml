@@ -21,7 +21,6 @@ jobs:
       COMMIT_SHA: ${{ github.sha }}
       REPOSITORY: ${{ github.repository }}
       VERSION_NUM: ${{ github.event.inputs.version || github.ref_name }}
-      REPOSITORY_NAME: ${{ github.repository }}
     steps:
       - name: Use role credentials for metrics
         uses: aws-actions/configure-aws-credentials@v4
@@ -99,6 +98,7 @@ jobs:
               \"prerelease\": false
             }")
           
+          echo $RELEASE_RESPONSE
           UPLOAD_URL=$(echo "$RELEASE_RESPONSE" | jq -r '.upload_url' | sed 's/{?name,label}//')
           RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id')
 
@@ -125,5 +125,5 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "WorkflowExecution" \
-            --dimensions "Repository=$REPOSITORY_NAME,Workflow=Release,Status=Failed" \
+            --dimensions "Repository=$REPOSITORY,Workflow=Release,Status=Failed" \
             --value 1
