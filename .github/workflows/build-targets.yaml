@@ -13,6 +13,8 @@ jobs:
     permissions:
       id-token: write  # Required for OIDC
     environment: build-targets-workflow-env
+    env:
+      REPOSITORY_NAME: ${{ github.repository }}
     strategy:
       matrix:
         build-target: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded]
@@ -88,7 +90,7 @@ jobs:
         if: failure()
         run: |
           aws cloudwatch put-metric-data \
-            --namespace "Aderende" \
-            --metric-name "WorkflowFailed" \
-            --dimensions "Name=BuildTargets" \
+            --namespace "GitHub/Workflows" \
+            --metric-name "WorkflowExecution" \
+            --dimensions "Repository=$REPOSITORY_NAME,Workflow=BuildTargets,Status=Failed" \
             --value 1

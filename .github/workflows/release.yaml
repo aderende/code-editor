@@ -21,6 +21,7 @@ jobs:
       COMMIT_SHA: ${{ github.sha }}
       REPOSITORY: ${{ github.repository }}
       VERSION_NUM: ${{ github.event.inputs.version || github.ref_name }}
+      REPOSITORY_NAME: ${{ github.repository }}
     steps:
       - name: Use role credentials for metrics
         uses: aws-actions/configure-aws-credentials@v4
@@ -122,7 +123,7 @@ jobs:
         if: failure()
         run: |
           aws cloudwatch put-metric-data \
-            --namespace "Aderende" \
-            --metric-name "WorkflowFailed" \
-            --dimensions "Name=Release" \
+            --namespace "GitHub/Workflows" \
+            --metric-name "WorkflowExecution" \
+            --dimensions "Repository=$REPOSITORY_NAME,Workflow=Release,Status=Failed" \
             --value 1
