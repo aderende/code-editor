@@ -10,6 +10,8 @@ jobs:
   build:
     name: Build Code Editor Targets
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC
     environment: build-targets-workflow-env
     strategy:
       matrix:
@@ -22,6 +24,18 @@ jobs:
       - name: Start Build Workflow
         run: |
           echo "Starting Build Workflow for target: ${{ matrix.build-target }}"
+      - name: Use role credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-west-2
+      
+      - name: Report metrics
+        run: |
+          aws cloudwatch put-metric-data \
+            --namespace "Aderende" \
+            --metric-name "BuildStarted" \
+            --value 1
         
       - name: Set up build environment
         run: |
@@ -52,7 +66,9 @@ jobs:
       
       - name: Build artifacts 
         run: |
-          ./scripts/build-artifacts.sh ${{ matrix.build-target }}
+          BUILD_TARGET=$(./scripts/determine-build-target.sh ${{ matrix.build-target }})
+          mkdir -p ./$BUILD_TARGET
+          echo "Mock build for ${{ matrix.build-target }}" > ./$BUILD_TARGET/README.txt
       
       - name: Prepare artifacts to upload
         run: |
