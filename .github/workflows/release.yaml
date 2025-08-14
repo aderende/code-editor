@@ -124,5 +124,5 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "Aderende" \
             --metric-name "WorkflowFailed" \
-            --dimentions "Name=Release" \
+            --dimensions "Name=Release" \
             --value 1

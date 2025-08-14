@@ -90,5 +90,5 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "Aderende" \
             --metric-name "WorkflowFailed" \
-            --dimentions "Name=BuildTargets" \
+            --dimensions "Name=BuildTargets" \
             --value 1
