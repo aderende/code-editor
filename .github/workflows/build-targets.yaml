@@ -24,18 +24,12 @@ jobs:
       - name: Start Build Workflow
         run: |
           echo "Starting Build Workflow for target: ${{ matrix.build-target }}"
-      - name: Use role credentials
-        uses: aws-actions/configure-aws-credentials@v1
+
+      - name: Use role credentials for metrics
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-west-2
-      
-      - name: Report metrics
-        run: |
-          aws cloudwatch put-metric-data \
-            --namespace "Aderende" \
-            --metric-name "BuildStarted" \
-            --value 1
         
       - name: Set up build environment
         run: |
@@ -89,3 +83,12 @@ jobs:
           name: ${{ github.sha }}-${{ matrix.build-target }}-build
           path: ${{ matrix.build-target }}-build.tar.gz
           retention-days: 90
+
+      - name: Report Failure Metric
+        if: failure()
+        run: |
+          aws cloudwatch put-metric-data \
+            --namespace "Aderende" \
+            --metric-name "WorkflowFailed" \
+            --dimentions "Name=BuildTargets" \
+            --value 1
